@@ -5,11 +5,12 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	_ "usebottles.com/steamgrid-proxy/config"
+	"usebottles.com/steamgrid-proxy/config"
 	"usebottles.com/steamgrid-proxy/controller"
 )
 
 func main() {
+	cnf := *config.Cnf
 	router := mux.NewRouter()
 
 	apiRouter := router.PathPrefix("/api").Subrouter()
@@ -19,5 +20,5 @@ func main() {
 	originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "OPTIONS"})
 
-	http.ListenAndServe(":8000", handlers.CORS(originsOk, headersOk, methodsOk)(router))
+	http.ListenAndServe(":" + cnf.Port, handlers.CORS(originsOk, headersOk, methodsOk)(router))
 }

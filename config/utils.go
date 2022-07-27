@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	ApiKey string `mapstructure:"api_key"`
+	Port string `mapstructure:"port"`
 }
 
 var Cnf *Config
