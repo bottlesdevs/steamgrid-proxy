@@ -1,17 +1,22 @@
 package config
 
 import (
+	"errors"
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/spf13/viper"
 )
 
 type Config struct {
 	ApiKey string `mapstructure:"api_key"`
-	Port string `mapstructure:"port"`
+	Port   string `mapstructure:"port"`
 }
 
 var Cnf *Config
+var ProcessPath string
 
 func init() {
 	viper.AddConfigPath("config/")
@@ -27,6 +32,22 @@ func init() {
 
 	if err != nil {
 		panic("Config error!\n" + err.Error())
+	}
+
+	ex, err := os.Executable()
+	if err != nil {
+		panic("Can't get process path!\n" + err.Error())
+	}
+	ProcessPath = filepath.Dir(ex)
+
+	fmt.Println("Process path: " + ProcessPath)
+
+	path := "cache"
+	if _, err := os.Stat(ProcessPath + "\\" + path); errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(ProcessPath+"\\"+path, os.ModePerm)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	fmt.Println("Config loaded!")
