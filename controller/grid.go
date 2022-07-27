@@ -22,9 +22,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	link := getFromCache(searchTerm)
 	if link != "" {
-		json, _ := json.Marshal(link)
+		jsonRes, _ := json.Marshal(link)
 		w.WriteHeader(200)
-		w.Write(json)
+		w.Write(jsonRes)
 		return
 	}
 
@@ -40,13 +40,13 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json, _ := json.Marshal(res)
+	jsonRes, _ := json.Marshal(res)
 	w.WriteHeader(200)
-	w.Write(json)
+	w.Write(jsonRes)
 }
 
 func getFromCache(g string) string {
-	data, err := os.ReadFile(config.ProcessPath + "\\cache\\" + g + ".txt")
+	data, err := os.ReadFile(config.ProcessPath + config.PATH_SEPARATOR + "cache" + config.PATH_SEPARATOR + g + ".txt")
 	if err != nil {
 		return ""
 	}

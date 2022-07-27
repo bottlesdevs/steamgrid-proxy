@@ -43,8 +43,9 @@ func init() {
 	fmt.Println("Process path: " + ProcessPath)
 
 	path := "cache"
-	if _, err := os.Stat(ProcessPath + "\\" + path); errors.Is(err, os.ErrNotExist) {
-		err := os.Mkdir(ProcessPath+"\\"+path, os.ModePerm)
+
+	if _, err := os.Stat(ProcessPath + PATH_SEPARATOR + path); errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(ProcessPath+PATH_SEPARATOR+path, os.ModePerm)
 		if err != nil {
 			log.Println(err)
 		}

@@ -78,13 +78,13 @@ func Search(t string) (m string, err error) {
 
 	msg = gridResponse.Data[0].Url
 
-	_, err = os.Create(config.ProcessPath + "\\cache\\" + t + ".txt")
+	_, err = os.Create(config.ProcessPath + config.PATH_SEPARATOR + "cache" + config.PATH_SEPARATOR + t + ".txt")
 	if err != nil {
 		fmt.Println("Error creating cache file for " + t)
 		fmt.Println(err)
 		return "", err
 	}
-	err = os.WriteFile(config.ProcessPath+"\\cache\\"+t+".txt", []byte(msg), 0)
+	err = os.WriteFile(config.ProcessPath+config.PATH_SEPARATOR+"cache"+config.PATH_SEPARATOR+t+".txt", []byte(msg), 0)
 	if err != nil {
 		fmt.Println("Error writing cache file for " + t)
 		fmt.Println(err)
