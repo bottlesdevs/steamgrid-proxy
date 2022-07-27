@@ -35,10 +35,10 @@ type GridData struct {
 
 const BASE_URL = "https://www.steamgriddb.com/api/v2"
 
-func callAPI(e string, t string) (r *http.Response, err error) {
+func callAPI(e string, t string, p string) (r *http.Response, err error) {
 	cnf := *config.Cnf
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", BASE_URL + e + t, nil)
+	req, err := http.NewRequest("GET", BASE_URL + e + t + "?" + p, nil)
 
 	req.Header.Set("Authorization", "Bearer " + cnf.ApiKey)
 	req.Header.Set("User-Agent", "curl/7.79.1")
@@ -47,7 +47,7 @@ func callAPI(e string, t string) (r *http.Response, err error) {
 }
 
 func Search(t string) (m string, err error) {
-	res, err := callAPI("/search/autocomplete/", t)
+	res, err := callAPI("/search/autocomplete/", t, "")
 
 	if err != nil {
 		return "", err
@@ -62,7 +62,7 @@ func Search(t string) (m string, err error) {
 	}
 
 	msg := searchResponse.Data[0].Name
-	res, err = callAPI("/grids/game/", fmt.Sprint(searchResponse.Data[0].Id))
+	res, err = callAPI("/grids/game/", fmt.Sprint(searchResponse.Data[0].Id), "dimensions=600x900")
 
 	if err != nil {
 		return "", err
