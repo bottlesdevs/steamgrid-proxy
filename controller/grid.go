@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/gorilla/mux"
 	"usebottles.com/steamgrid-proxy/config"
@@ -13,6 +14,7 @@ import (
 func Search(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	searchTerm := vars["gameName"]
+	searchType := vars["type"]
 
 	if searchTerm == "" {
 		w.WriteHeader(400)
@@ -20,7 +22,17 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	link := getFromCache(searchTerm)
+	if searchType == "" {
+		searchType = "grids"
+	}
+
+	if !config.IsValidImageType(searchType) {
+		w.WriteHeader(400)
+		w.Write([]byte("Invalid search type"))
+		return
+	}
+
+	link := getFromCache(searchTerm, searchType)
 	if link != "" {
 		jsonRes, _ := json.Marshal(link)
 		w.WriteHeader(200)
@@ -28,7 +40,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := proxy.Search(searchTerm)
+	res, err := proxy.Search(searchTerm, searchType)
 
 	if err != nil {
 		if res == "404" {
@@ -45,8 +57,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonRes)
 }
 
-func getFromCache(g string) string {
-	data, err := os.ReadFile(config.ProcessPath + config.PATH_SEPARATOR + "cache" + config.PATH_SEPARATOR + g + ".txt")
+func getFromCache(g string, s string) string {
+	data, err := os.ReadFile(filepath.Join(config.ProcessPath, "cache", s, g+".txt"))
 	if err != nil {
 		return ""
 	}

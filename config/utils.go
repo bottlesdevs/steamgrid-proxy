@@ -17,6 +17,16 @@ type Config struct {
 
 var Cnf *Config
 var ProcessPath string
+var ImageTypes []string = []string{"grids", "heroes", "logos", "icons"}
+
+func IsValidImageType(imageType string) bool {
+	for _, v := range ImageTypes {
+		if v == imageType {
+			return true
+		}
+	}
+	return false
+}
 
 func init() {
 	viper.AddConfigPath("config/")
@@ -44,10 +54,12 @@ func init() {
 
 	path := "cache"
 
-	if _, err := os.Stat(ProcessPath + PATH_SEPARATOR + path); errors.Is(err, os.ErrNotExist) {
-		err := os.Mkdir(ProcessPath+PATH_SEPARATOR+path, os.ModePerm)
-		if err != nil {
-			log.Println(err)
+	for _, imageType := range ImageTypes {
+		if _, err := os.Stat(filepath.Join(ProcessPath, path, imageType)); errors.Is(err, os.ErrNotExist) {
+			err := os.Mkdir(filepath.Join(ProcessPath, path, imageType), os.ModePerm)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	}
 

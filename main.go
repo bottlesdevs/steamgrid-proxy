@@ -15,10 +15,11 @@ func main() {
 
 	apiRouter := router.PathPrefix("/api").Subrouter()
 	apiRouter.HandleFunc("/search/{gameName}", controller.Search).Methods("GET")
+	apiRouter.HandleFunc("/search/{gameName}/{type}", controller.Search).Methods("GET")
 
 	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 	originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "OPTIONS"})
 
-	http.ListenAndServe(":" + cnf.Port, handlers.CORS(originsOk, headersOk, methodsOk)(router))
+	http.ListenAndServe(":"+cnf.Port, handlers.CORS(originsOk, headersOk, methodsOk)(router))
 }

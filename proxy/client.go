@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"usebottles.com/steamgrid-proxy/config"
 )
@@ -34,6 +35,8 @@ type GridData struct {
 }
 
 const BASE_URL = "https://www.steamgriddb.com/api/v2"
+const GRID_DIMENSIONS = "dimensions=600x900"
+const HERO_DIMENSIONS = "dimensions=1920x620"
 
 func callAPI(e string, t string, p string) (r *http.Response, err error) {
 	cnf := *config.Cnf
@@ -46,30 +49,47 @@ func callAPI(e string, t string, p string) (r *http.Response, err error) {
 	return r, err
 }
 
-func Search(t string) (m string, err error) {
+func AutocompleteSearch(t string) (searchResponse ProxySearchResponse, err error) {
+
 	res, err := callAPI("/search/autocomplete/", t, "")
 
 	if err != nil {
-		return "", err
+		return ProxySearchResponse{}, err
 	}
 
-	var searchResponse ProxySearchResponse
-	buf, _ := ioutil.ReadAll(res.Body)
+	buf, _ := io.ReadAll(res.Body)
 	json.Unmarshal(buf, &searchResponse)
 
 	if len(searchResponse.Data) == 0 {
-		return "404", errors.New("404 Game Not Found")
+		return ProxySearchResponse{}, errors.New("404 Game Not Found")
 	}
 
+	return searchResponse, nil
+}
+
+func Search(t string, s string) (m string, err error) {
+	searchResponse, err := AutocompleteSearch(t)
+	if err != nil {
+		return "404", err
+	}
 	msg := searchResponse.Data[0].Name
-	res, err = callAPI("/grids/game/", fmt.Sprint(searchResponse.Data[0].Id), "dimensions=600x900")
+
+	dimensions := GRID_DIMENSIONS
+
+	if s == "heroes" {
+		dimensions = HERO_DIMENSIONS
+	} else if s != "grids" {
+		dimensions = "styles=official"
+	}
+
+	res, err := callAPI(fmt.Sprintf("/%s/game/", s), fmt.Sprint(searchResponse.Data[0].Id), dimensions)
 
 	if err != nil {
 		return "", err
 	}
 
 	var gridResponse ProxyGridResponse
-	buf, _ = ioutil.ReadAll(res.Body)
+	buf, _ := io.ReadAll(res.Body)
 	json.Unmarshal(buf, &gridResponse)
 
 	if len(gridResponse.Data) == 0 {
@@ -78,18 +98,27 @@ func Search(t string) (m string, err error) {
 
 	msg = gridResponse.Data[0].Url
 
-	_, err = os.Create(config.ProcessPath + config.PATH_SEPARATOR + "cache" + config.PATH_SEPARATOR + t + ".txt")
+	err = CreateCache(t, s, msg)
 	if err != nil {
-		fmt.Println("Error creating cache file for " + t)
-		fmt.Println(err)
-		return "", err
-	}
-	err = os.WriteFile(config.ProcessPath+config.PATH_SEPARATOR+"cache"+config.PATH_SEPARATOR+t+".txt", []byte(msg), 0)
-	if err != nil {
-		fmt.Println("Error writing cache file for " + t)
-		fmt.Println(err)
 		return "", err
 	}
 
 	return msg, nil
+}
+
+func CreateCache(t string, s string, msg string) (err error) {
+	_, err = os.Create(filepath.Join(config.ProcessPath, "cache", s, t+".txt"))
+	if err != nil {
+		fmt.Println("Error creating cache file for " + t)
+		fmt.Println(err)
+		return err
+	}
+	err = os.WriteFile(filepath.Join(config.ProcessPath, "cache", s, t+".txt"), []byte(msg), 0)
+	if err != nil {
+		fmt.Println("Error writing cache file for " + t)
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
 }
