@@ -44,10 +44,14 @@ func init() {
 
 	path := "cache"
 
-	if _, err := os.Stat(ProcessPath + PATH_SEPARATOR + path); errors.Is(err, os.ErrNotExist) {
-		err := os.Mkdir(ProcessPath+PATH_SEPARATOR+path, os.ModePerm)
-		if err != nil {
-			log.Println(err)
+	var imageTypes []string = []string{"grids", "heroes", "logos", "icons"}
+
+	for _, imageType := range imageTypes {
+		if _, err := os.Stat(filepath.Join(ProcessPath, path, imageType)); errors.Is(err, os.ErrNotExist) {
+			err := os.Mkdir(filepath.Join(ProcessPath, path, imageType), os.ModePerm)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	}
 
