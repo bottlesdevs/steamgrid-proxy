@@ -26,7 +26,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		searchType = "grids"
 	}
 
-	if (searchType != "grids") && (searchType != "heroes") && (searchType != "logos") && (searchType != "icons") {
+	if !config.IsValidImageType(searchType) {
 		w.WriteHeader(400)
 		w.Write([]byte("Invalid search type"))
 		return
