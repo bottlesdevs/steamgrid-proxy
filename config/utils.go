@@ -17,7 +17,7 @@ type Config struct {
 
 var Cnf *Config
 var ProcessPath string
-var ImageTypes []string = []string{"grids", "heroes", "logos", "icons"}
+var ImageTypes []string = []string{"grids", "hgrids", "heroes", "logos", "icons"}
 
 func IsValidImageType(imageType string) bool {
 	for _, v := range ImageTypes {
@@ -54,6 +54,12 @@ func init() {
 
 	path := "cache"
 
+	if _, err := os.Stat(filepath.Join(ProcessPath, path)); errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(filepath.Join(ProcessPath, path), os.ModePerm)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 	for _, imageType := range ImageTypes {
 		if _, err := os.Stat(filepath.Join(ProcessPath, path, imageType)); errors.Is(err, os.ErrNotExist) {
 			err := os.Mkdir(filepath.Join(ProcessPath, path, imageType), os.ModePerm)

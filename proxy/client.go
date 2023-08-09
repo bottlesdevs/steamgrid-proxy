@@ -36,6 +36,7 @@ type GridData struct {
 
 const BASE_URL = "https://www.steamgriddb.com/api/v2"
 const GRID_DIMENSIONS = "dimensions=600x900"
+const HGRID_DIMENSIONS = "dimensions=920x430"
 const HERO_DIMENSIONS = "dimensions=1920x620"
 
 func callAPI(e string, t string, p string) (r *http.Response, err error) {
@@ -78,11 +79,18 @@ func Search(t string, s string) (m string, err error) {
 
 	if s == "heroes" {
 		dimensions = HERO_DIMENSIONS
+	} else if s == "hgrids" {
+		dimensions = HGRID_DIMENSIONS
 	} else if s != "grids" {
 		dimensions = "styles=official"
 	}
 
-	res, err := callAPI(fmt.Sprintf("/%s/game/", s), fmt.Sprint(searchResponse.Data[0].Id), dimensions)
+	var itype string = s
+	if itype == "hgrids" {
+		itype = "grids"
+	}
+
+	res, err := callAPI(fmt.Sprintf("/%s/game/", itype), fmt.Sprint(searchResponse.Data[0].Id), dimensions)
 
 	if err != nil {
 		return "", err
